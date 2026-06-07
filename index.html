@@ -115,14 +115,14 @@
   .head .avatar{width:78px;height:78px;border-radius:7px;flex:0 0 78px;overflow:hidden;position:relative;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.25);cursor:grab;touch-action:none}
   .head .avatar.has{background:#fff}
   .head .avatar:active{cursor:grabbing}
-  .head .avatar .aphoto{position:absolute;inset:0;background:center/cover no-repeat;will-change:transform}
+  .head .avatar .aphoto{position:absolute;inset:0;background:center/contain no-repeat;will-change:transform}
   .head .avatar .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;opacity:.85;text-align:center;line-height:1.3;font-weight:500}
   .head .avatar.has .ph{display:none}
 
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#fff;padding:2px}
   .cell{position:relative;aspect-ratio:1/1;background:#eceef2;cursor:pointer;overflow:hidden;user-select:none;touch-action:none}
   .cell.filled{cursor:grab;background:#fff}.cell.filled:active{cursor:grabbing}
-  .cell .photo{position:absolute;inset:0;background:center/cover no-repeat;will-change:transform}
+  .cell .photo{position:absolute;inset:0;background:center/contain no-repeat;will-change:transform}
   .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cfd4dc;font-size:23px;transition:color .2s}
   .cell:hover .ph{color:#aab0bc}
   .cell.filled .ph{display:none}
@@ -329,7 +329,7 @@ function attachPanZoom(vp,photo,state,onTap){
   vp.addEventListener('wheel',e=>{if(!state.img)return;e.preventDefault();const s=boardScale||1;const r=vp.getBoundingClientRect();const mx=(e.clientX-r.left-r.width/2)/s,my=(e.clientY-r.top-r.height/2)/s;const old=state.scale;const ns=clamp(old*(e.deltaY<0?1.12:1/1.12),.3,8);state.x=mx-(mx-state.x)*(ns/old);state.y=my-(my-state.y)*(ns/old);state.scale=ns;apply();},{passive:false});
 }
 function readImg(file,cb){const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file);}
-function loadInto(state,photo,el,d){const im=new Image();im.onload=()=>{state.img=im;fit();};im.src=d;photo.style.backgroundImage='url("'+d+'")';state.scale=1;state.x=0;state.y=0;state.apply();el.classList.add('has','filled');}
+function loadInto(state,photo,el,d){const im=new Image();im.onload=()=>{state.img=im;const r=Math.max(im.naturalWidth,im.naturalHeight)/Math.min(im.naturalWidth,im.naturalHeight);state.scale=r;state.x=0;state.y=0;state.apply();fit();};im.src=d;photo.style.backgroundImage='url("'+d+'")';el.classList.add('has','filled');}
 
 /* avatar */
 const avatarState={img:null,scale:1,x:0,y:0,apply(){}};
@@ -377,7 +377,7 @@ function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.move
 function drawPhoto(ctx,R,st,S,radius){
   const x=R.x*S,y=R.y*S,w=R.w*S,h=R.h*S;ctx.save();roundRect(ctx,x,y,w,h,(radius||0)*S);ctx.clip();
   ctx.fillStyle='#fff';ctx.fillRect(x,y,w,h);
-  const im=st.img,iw=im.naturalWidth,ih=im.naturalHeight,cov=Math.max(w/iw,h/ih);
+  const im=st.img,iw=im.naturalWidth,ih=im.naturalHeight,cov=Math.min(w/iw,h/ih);
   const dw=iw*cov*st.scale,dh=ih*cov*st.scale,cx=x+w/2+st.x*S,cy=y+h/2+st.y*S;
   ctx.drawImage(im,cx-dw/2,cy-dh/2,dw,dh);ctx.restore();
 }
