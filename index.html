@@ -115,14 +115,14 @@
   .head .avatar{width:78px;height:78px;border-radius:7px;flex:0 0 78px;overflow:hidden;position:relative;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.25);cursor:grab;touch-action:none}
   .head .avatar.has{background:#fff}
   .head .avatar:active{cursor:grabbing}
-  .head .avatar .aphoto{position:absolute;inset:0;background:center/contain no-repeat;will-change:transform}
+  .head .avatar .aphoto{position:absolute;inset:0;background-repeat:no-repeat;background-position:center}
   .head .avatar .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;opacity:.85;text-align:center;line-height:1.3;font-weight:500}
   .head .avatar.has .ph{display:none}
 
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#fff;padding:2px}
   .cell{position:relative;aspect-ratio:1/1;background:#eceef2;cursor:pointer;overflow:hidden;user-select:none;touch-action:none}
   .cell.filled{cursor:grab;background:#fff}.cell.filled:active{cursor:grabbing}
-  .cell .photo{position:absolute;inset:0;background:center/contain no-repeat;will-change:transform}
+  .cell .photo{position:absolute;inset:0;background-repeat:no-repeat;background-position:center}
   .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cfd4dc;font-size:23px;transition:color .2s}
   .cell:hover .ph{color:#aab0bc}
   .cell.filled .ph{display:none}
@@ -311,7 +311,7 @@ $('resultSeg').addEventListener('click',e=>{const b=e.target.closest('button');i
 /* pan/zoom */
 function attachPanZoom(vp,photo,state,onTap){
   let pdown=false,moved=false,sx,sy,ox,oy;const pts=new Map();let pinch=null;
-  const apply=()=>{photo.style.transform=`translate(${state.x}px,${state.y}px) scale(${state.scale})`;};
+  const apply=()=>{const im=state.img;if(!im)return;const L=photo.clientWidth||photo.offsetWidth,Lh=photo.clientHeight||photo.offsetHeight;const cs=Math.min(L/im.naturalWidth,Lh/im.naturalHeight);const dw=im.naturalWidth*cs*state.scale,dh=im.naturalHeight*cs*state.scale;photo.style.backgroundSize=dw+'px '+dh+'px';photo.style.backgroundPosition=((L-dw)/2+state.x)+'px '+((Lh-dh)/2+state.y)+'px';};
   state.apply=apply;
   vp.addEventListener('pointerdown',e=>{
     if(e.target.closest('.tools'))return;
