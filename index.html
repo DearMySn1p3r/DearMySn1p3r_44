@@ -113,6 +113,7 @@
   .head .name{font-size:27px;font-weight:700;line-height:1.18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
   .head .note{font-size:12px;font-weight:400;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .head .avatar{width:78px;height:78px;border-radius:7px;flex:0 0 78px;overflow:hidden;position:relative;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.25);cursor:grab;touch-action:none}
+  .head .avatar.has{background:#fff}
   .head .avatar:active{cursor:grabbing}
   .head .avatar .aphoto{position:absolute;inset:0;background:center/cover no-repeat;will-change:transform}
   .head .avatar .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;opacity:.85;text-align:center;line-height:1.3;font-weight:500}
@@ -120,7 +121,7 @@
 
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#fff;padding:2px}
   .cell{position:relative;aspect-ratio:1/1;background:#eceef2;cursor:pointer;overflow:hidden;user-select:none;touch-action:none}
-  .cell.filled{cursor:grab}.cell.filled:active{cursor:grabbing}
+  .cell.filled{cursor:grab;background:#fff}.cell.filled:active{cursor:grabbing}
   .cell .photo{position:absolute;inset:0;background:center/cover no-repeat;will-change:transform}
   .cell .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cfd4dc;font-size:23px;transition:color .2s}
   .cell:hover .ph{color:#aab0bc}
@@ -375,6 +376,7 @@ window.addEventListener('resize',fit);
 function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function drawPhoto(ctx,R,st,S,radius){
   const x=R.x*S,y=R.y*S,w=R.w*S,h=R.h*S;ctx.save();roundRect(ctx,x,y,w,h,(radius||0)*S);ctx.clip();
+  ctx.fillStyle='#fff';ctx.fillRect(x,y,w,h);
   const im=st.img,iw=im.naturalWidth,ih=im.naturalHeight,cov=Math.max(w/iw,h/ih);
   const dw=iw*cov*st.scale,dh=ih*cov*st.scale,cx=x+w/2+st.x*S,cy=y+h/2+st.y*S;
   ctx.drawImage(im,cx-dw/2,cy-dh/2,dw,dh);ctx.restore();
