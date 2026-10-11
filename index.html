@@ -99,6 +99,8 @@
   .rng b{width:38px;text-align:right;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
   .rng button{width:24px;height:24px;border-radius:6px;color:var(--sub);font-size:14px;transition:.15s}
   .rng button:hover{color:var(--ink);background:var(--fill)}
+  .rng button svg{width:14px;height:14px;display:block;margin:auto}
+  .rng #avDel:hover{color:#e5484d}
   .av{width:20px;height:20px;border-radius:5px;overflow:hidden}
   .av:empty{display:none}
   .av img{width:100%;height:100%;object-fit:cover;display:block}
@@ -309,7 +311,7 @@
       <label class="r"><span>제시어</span><input class="inl" type="text" data-k="name" placeholder="입력" maxlength="24"></label>
       <button class="r btnrow" id="avBtn"><span>대표 썸네일</span><span class="val"><span class="av" id="avPrev"></span><span id="avTxt">올리기</span><i class="chev">›</i></span></button>
       <input type="file" accept="image/*" id="mainFile" hidden>
-      <div class="r zrow" id="avZoomRow" hidden><span>썸네일 크기</span><div class="rng"><input type="range" id="avZoom" min="100" max="400" step="1" value="100"><b id="avZoomVal">100%</b><button id="avReset" title="원래대로">↺</button></div></div>
+      <div class="r zrow" id="avZoomRow" hidden><span>썸네일 크기</span><div class="rng"><input type="range" id="avZoom" min="100" max="400" step="1" value="100"><b id="avZoomVal">100%</b><button id="avReset" title="원래대로">↺</button><button id="avDel" title="썸네일 삭제"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>
       <div class="r"><span>그리드</span><div class="seg" data-k="cols"><button data-v="3">3 × 3</button><button data-v="4">4 × 4</button></div></div>
       <label class="r switch" data-k="showFoot"><span>하단 컨트롤 바</span><span class="toggle"></span></label>
 
@@ -846,6 +848,9 @@ avatarState.onApply=()=>{const p=Math.round(avatarState.scale/(avatarState.minS|
   if(document.activeElement!==avZoom)avZoom.value=Math.min(400,p);avZoomVal.textContent=p+'%';};
 avZoom.addEventListener('input',()=>{if(!avatarState.img)return;const m=avatarState.minS||1;
   const old=avatarState.scale,ns=m*avZoom.value/100;avatarState.x*=ns/old;avatarState.y*=ns/old;avatarState.scale=ns;avatarState.apply();});
+function clearAvatar(){Object.assign(avatarState,{img:null,src:null,scale:1,x:0,y:0});aphoto.style.backgroundImage='';
+  avEl.classList.remove('has','filled');$('avPrev').innerHTML='';$('avTxt').textContent='올리기';$('avZoomRow').hidden=true;$('mainFile').value='';schedulePreview();}
+$('avDel').addEventListener('click',clearAvatar);
 $('avReset').addEventListener('click',()=>{if(!avatarState.img)return;avatarState.scale=avatarState.minS||1;avatarState.x=0;avatarState.y=0;avatarState.apply();});
 avEl.addEventListener('dragover',e=>{e.preventDefault();avEl.classList.add('dragover');});
 avEl.addEventListener('dragleave',()=>avEl.classList.remove('dragover'));
