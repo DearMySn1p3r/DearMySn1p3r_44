@@ -436,7 +436,12 @@ document.querySelectorAll('.switch[data-k]').forEach(sw=>{
 function attachPanZoom(vp,photo,state,onTap){
   let pdown=false,moved=false,sx,sy,ox,oy;const pts=new Map();let pinch=null;
   const apply=()=>{const im=state.img;if(!im)return;const L=photo.clientWidth||photo.offsetWidth,Lh=photo.clientHeight||photo.offsetHeight;
-    const cs=Math.min(L/im.naturalWidth,Lh/im.naturalHeight);const dw=im.naturalWidth*cs*state.scale,dh=im.naturalHeight*cs*state.scale;
+    if(!L||!Lh)return;
+    const cs=Math.min(L/im.naturalWidth,Lh/im.naturalHeight);
+    // never smaller than "cover", never dragged past an edge → no empty space
+    const minS=Math.max(L/(im.naturalWidth*cs),Lh/(im.naturalHeight*cs));state.scale=clamp(state.scale,minS,Math.max(minS,8));
+    const dw=im.naturalWidth*cs*state.scale,dh=im.naturalHeight*cs*state.scale;
+    const mx=Math.max(0,(dw-L)/2),my=Math.max(0,(dh-Lh)/2);state.x=clamp(state.x,-mx,mx);state.y=clamp(state.y,-my,my);
     photo.style.backgroundSize=dw+'px '+dh+'px';photo.style.backgroundPosition=((L-dw)/2+state.x)+'px '+((Lh-dh)/2+state.y)+'px';};
   state.apply=apply;
   vp.addEventListener('pointerdown',e=>{
