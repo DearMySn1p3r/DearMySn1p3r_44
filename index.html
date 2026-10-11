@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="MOMO.png">
 <link rel="apple-touch-icon" href="MOMO.png">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/variable/pretendardvariable.css" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
 <style>
@@ -60,6 +60,17 @@
   .links b{color:var(--ink);font-weight:600}
   .links button{font-size:12.5px;color:var(--sub);transition:color .15s}
   .links button:hover{color:var(--ink)}
+  .links button.on{color:var(--theme-deep);font-weight:600}
+  .links button.on::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--theme);margin-right:6px;vertical-align:1px}
+  .mini{position:relative;margin:10px 0 4px;border-radius:12px;background:var(--stage);padding:16px;display:grid;place-items:center;min-height:110px;transition:background .25s}
+  .mini canvas{display:none;width:100%;max-width:230px;height:auto;border-radius:4px;box-shadow:var(--card-shadow)}
+  .mini.on canvas{display:block}
+  .mini.on p{display:none}
+  .mini p{font-size:12px;color:var(--mute);text-align:center;line-height:1.5}
+  .mini-big{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:8px;background:var(--bg);color:var(--sub);display:none;place-items:center;box-shadow:0 0 0 1px var(--line);transition:.15s}
+  .mini.on .mini-big{display:grid}
+  .mini-big:hover{color:var(--ink)}
+  .mini-big svg{width:13px;height:13px}
 
   /* settings column */
   .side{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
@@ -139,9 +150,9 @@
   @keyframes pop{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .head{background:var(--theme);color:var(--theme-text);padding:20px 22px;display:flex;gap:16px;align-items:center;justify-content:space-between;transition:background .3s}
   .head .htxt{min-width:0;flex:1;display:flex;flex-direction:column}
-  .head .phrase{font-size:13px;opacity:.95;margin-bottom:5px}
-  .head .name{font-size:27px;font-weight:700;line-height:1.18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
-  .head .note{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .head .phrase{font-size:12.5px;font-weight:500;opacity:.92;margin-bottom:5px;letter-spacing:-.01em}
+  .head .name{font-family:'Outfit','Pretendard Variable',Pretendard,sans-serif;font-size:30px;font-weight:700;line-height:1.12;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+  .head .note{font-size:11.5px;font-weight:500;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
   .head .avatar{width:78px;height:78px;border-radius:7px;flex:0 0 78px;overflow:hidden;position:relative;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.25);cursor:grab;touch-action:none}
   .head .avatar.has{background:#fff;cursor:move}
   .head .avatar:not(.has){cursor:pointer}
@@ -171,6 +182,13 @@
   .cell .tools button{width:22px;height:22px;border-radius:6px;border:none;cursor:pointer;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;backdrop-filter:blur(4px)}
   .cell .tools button svg{width:12px;height:12px}
   .cell .tools button:hover{background:rgba(0,0,0,.9)}
+  .card.arrange .cell.filled{cursor:grab}
+  .card.arrange .cell .tools{display:none!important}
+  .card.arrange .cell.filled::after{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(255,255,255,.95);border-radius:7px;pointer-events:none;z-index:3;filter:drop-shadow(0 0 1px rgba(0,0,0,.35))}
+  .cell.lifting{opacity:.28}
+  .cell.target{box-shadow:inset 0 0 0 3px var(--theme)}
+  .card.arrange .cell:not(.filled) .ph{color:#b9bec7}
+  .drag-ghost{position:fixed;pointer-events:none;z-index:70;overflow:hidden;border-radius:8px;box-shadow:0 18px 40px -12px rgba(0,0,0,.45);transform:scale(1.06) rotate(-2deg);opacity:.94;transition:transform .12s}
 
   .foot{display:none;align-items:center;justify-content:space-between;padding:13px 16px;border-top:1px solid #f0f1f4;background:#fff}
   .card.showfoot .foot{display:flex}
@@ -266,6 +284,7 @@
     <div class="links">
       <span id="count"></span>
       <button id="fillBtn">이미지 채우기</button>
+      <button id="arrangeBtn">배치 모드</button>
       <button id="allBtn">모두 선택</button>
       <button id="shufBtn">섞기</button>
       <button id="clearBtn">비우기</button>
@@ -318,6 +337,13 @@
       <label class="r switch" data-k="loop"><span>무한 반복</span><span class="toggle"></span></label>
       <div class="r"><span>클릭 순서</span><div class="seg" data-k="order"><button data-v="seq">순서대로</button><button data-v="rand">무작위</button></div></div>
       <div class="r"><span>속도</span><div class="seg" data-k="speed"><button data-v="1.5">느리게</button><button data-v="1">보통</button><button data-v="0.65">빠르게</button></div></div>
+
+      <div class="h">미리보기</div>
+      <div class="mini" id="miniBox">
+        <canvas id="mini"></canvas>
+        <p>이미지를 넣으면<br>여기서 GIF가 바로 재생돼요</p>
+        <button class="mini-big" id="miniBig" title="크게 보기"><svg viewBox="0 0 24 24" fill="none"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
     </div>
     <div class="cta">
       <button class="btn quiet" id="pngBtn">PNG</button>
@@ -382,7 +408,7 @@ const cfg=Object.assign({},DEF);
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('rcm-v3')||'{}'));}catch(e){}
 if(!/^#[0-9a-f]{6}$/i.test(cfg.theme))cfg.theme=DEF.theme;
 ['showFoot','cursor','loop'].forEach(k=>{if(typeof cfg[k]!=='boolean')cfg[k]=DEF[k];});
-const save=()=>{try{localStorage.setItem('rcm-v3',JSON.stringify(cfg));}catch(e){}};
+const save=()=>{try{localStorage.setItem('rcm-v3',JSON.stringify(cfg));}catch(e){}schedulePreview();};
 
 /* ---------- theme ---------- */
 function lum(hex){const f=v=>(v/=255)<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);const[r,g,b]=rgb(hex);return .2126*f(r)+.7152*f(g)+.0722*f(b);}
@@ -446,7 +472,7 @@ function attachPanZoom(vp,photo,state,onTap){
     const dw=im.naturalWidth*cs*state.scale,dh=im.naturalHeight*cs*state.scale;
     const mx=Math.max(0,(dw-L)/2),my=Math.max(0,(dh-Lh)/2);state.x=clamp(state.x,-mx,mx);state.y=clamp(state.y,-my,my);
     photo.style.backgroundSize=dw+'px '+dh+'px';photo.style.backgroundPosition=((L-dw)/2+state.x)+'px '+((Lh-dh)/2+state.y)+'px';
-    state.minS=minS;if(state.onApply)state.onApply();};
+    state.minS=minS;if(state.onApply)state.onApply();schedulePreview();};
   state.apply=apply;
   vp.addEventListener('pointerdown',e=>{
     if(e.target.closest('.tools'))return;
@@ -521,6 +547,7 @@ function fillFiles(files){
   if(files.length>empty.length)toast((files.length-empty.length)+'장은 자리가 없어 빠졌어요');
 }
 function updateCount(){
+  schedulePreview();
   const filled=cells.filter(c=>c.state.img).length,sel=cells.filter(c=>c.state.img&&c.cell.classList.contains('sel')).length;
   $('count').innerHTML='<b>'+sel+'</b> 선택 · '+filled+' / '+cells.length;
 }
@@ -629,20 +656,20 @@ function drawErr(ctx,P,a){
 
 /* ---------- capture ---------- */
 function geometry(){
-  const capR=card.getBoundingClientRect(),rel=el=>{const r=el.getBoundingClientRect();return{x:r.left-capR.left,y:r.top-capR.top,w:r.width,h:r.height};};
+  const capR=card.getBoundingClientRect(),k=boardScale||1,rel=el=>{const r=el.getBoundingClientRect();return{x:(r.left-capR.left)/k,y:(r.top-capR.top)/k,w:r.width/k,h:r.height/k};};
   const filled=[],sel=[];
   cells.forEach(c=>{if(c.state.img){const R=rel(c.cell);filled.push({R,st:c.state});if(c.cell.classList.contains('sel'))sel.push({R});}});
   const avatar=avatarState.img?{R:rel($('cardAvatar')),st:avatarState}:null;
-  return{filled,sel,avatar,grid:rel(grid),verify:cfg.showFoot?rel($('verifyBtn')):null,W:capR.width,H:capR.height};
+  return{filled,sel,avatar,grid:rel(grid),verify:cfg.showFoot?rel($('verifyBtn')):null,W:card.offsetWidth,H:card.offsetHeight};
 }
-async function fontsReady(){try{await Promise.race([Promise.all([document.fonts.ready,document.fonts.load('700 16px "Pretendard Variable"'),document.fonts.load('400 16px "Pretendard Variable"')]),new Promise(r=>setTimeout(r,1500))]);}catch(e){}}
+async function fontsReady(){try{await Promise.race([Promise.all([document.fonts.ready,document.fonts.load('700 16px "Pretendard Variable"'),document.fonts.load('400 16px "Pretendard Variable"'),document.fonts.load('700 30px Outfit')]),new Promise(r=>setTimeout(r,1500))]);}catch(e){}}
 async function decodeAll(){const a=[];cells.forEach(c=>c.state.img&&a.push(c.state.img));avatarState.img&&a.push(avatarState.img);await Promise.all(a.map(im=>im.decode?im.decode().catch(()=>{}):0));}
-async function renderBase(S){
-  if(document.activeElement&&document.activeElement.isContentEditable)document.activeElement.blur();
-  const prevT=cardwrap.style.transform;cardwrap.style.transform='none';
-  card.classList.add('capturing');let base,geo;
-  try{geo=geometry();base=await html2canvas(card,{scale:S,backgroundColor:'#ffffff',useCORS:true,imageTimeout:0,logging:false});}
-  finally{card.classList.remove('capturing');cardwrap.style.transform=prevT;}
+async function renderBase(S,quiet){
+  if(!quiet&&document.activeElement&&document.activeElement.isContentEditable)document.activeElement.blur();
+  const geo=geometry();
+  // everything happens on html2canvas's cloned copy, so the live card never flickers
+  const base=await html2canvas(card,{scale:S,backgroundColor:'#ffffff',useCORS:true,imageTimeout:0,logging:false,
+    onclone:d=>{const c=d.getElementById('card');if(c)c.classList.add('capturing');const w=d.getElementById('cardwrap');if(w)w.style.transform='none';}});
   return{base,geo};
 }
 function buildFilled(base,geo,S){
@@ -662,9 +689,9 @@ const libsOk=()=>typeof html2canvas!=='undefined';
 function fname(ext){return 'recaptcha_'+(cfg.name||'recaptcha').trim().replace(/\s+/g,'_')+'.'+ext;}
 
 /* ================= GIF scene ================= */
-async function prepare(){
+async function prepare(quiet){
   await fontsReady();await decodeAll();
-  const S=GS;const{base,geo}=await renderBase(S);
+  const S=GS;const{base,geo}=await renderBase(S,quiet);
   const P={S,geo,W:geo.W,H:geo.H,cw:base.width,ch:base.height,filled:buildFilled(base,geo,S)};
   if(cfg.ending==='success'||cfg.ending==='fail'){
     const r=await renderRobot(S);P.robot=r;P.rb={ow:r.w,oh:r.h,ox:(P.W-r.w)/2,oy:(P.H-r.h)/2};
@@ -806,7 +833,7 @@ $('pngBtn').addEventListener('click',async()=>{
 });
 
 const st=document.createElement('style');
-st.textContent='#card.capturing .photo,#card.capturing .aphoto,#card.capturing .frame,#card.capturing .check,#card.capturing .ph{visibility:hidden}#card.capturing .tools{display:none!important}#card.capturing{animation:none!important;box-shadow:none}';
+st.textContent='#card.capturing .photo,#card.capturing .aphoto,#card.capturing .frame,#card.capturing .check,#card.capturing .ph{visibility:hidden}#card.capturing .tools{display:none!important}#card.capturing{animation:none!important;box-shadow:none}#card.capturing .cell::after{display:none!important}';
 document.head.appendChild(st);
 
 
@@ -833,6 +860,50 @@ nameEl.addEventListener('blur',()=>{nameEl.contentEditable='false';cfg.name=name
 nameEl.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,(e.clipboardData.getData('text/plain')||'').replace(/\s+/g,' '));});
 
 
+
+/* ---------- arrange mode: drag a photo onto another cell to swap ---------- */
+let arrange=false;
+const arrangeBtn=$('arrangeBtn');
+function setArrange(on){arrange=on;card.classList.toggle('arrange',on);arrangeBtn.classList.toggle('on',on);
+  arrangeBtn.textContent=on?'배치 완료':'배치 모드';if(on)toast('사진을 끌어서 다른 칸에 놓으세요');}
+arrangeBtn.addEventListener('click',()=>setArrange(!arrange));
+grid.addEventListener('wheel',e=>{if(arrange)e.stopPropagation();},true);
+grid.addEventListener('pointerdown',e=>{
+  if(!arrange)return;e.stopPropagation();e.preventDefault();
+  const src=cells.find(c=>c.cell.contains(e.target));if(!src||!src.state.img)return;
+  const r=src.cell.getBoundingClientRect(),cw=src.cell.offsetWidth,dx=e.clientX-r.left,dy=e.clientY-r.top;
+  const ghost=document.createElement('div');ghost.className='drag-ghost';
+  Object.assign(ghost.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});
+  const ph=src.photo.cloneNode();ph.style.cssText=src.photo.style.cssText+';position:absolute;left:0;top:0;width:'+cw+'px;height:'+cw+'px;transform:scale('+boardScale+');transform-origin:0 0';
+  ghost.appendChild(ph);document.body.appendChild(ghost);src.cell.classList.add('lifting');
+  let tgt=null;
+  const mv=ev=>{ghost.style.left=(ev.clientX-dx)+'px';ghost.style.top=(ev.clientY-dy)+'px';
+    const el=document.elementFromPoint(ev.clientX,ev.clientY),t=el&&cells.find(c=>c.cell===el.closest('.cell'));
+    if(tgt&&tgt!==t)tgt.cell.classList.remove('target');tgt=t&&t!==src?t:null;if(tgt)tgt.cell.classList.add('target');};
+  const end=()=>{window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',end);window.removeEventListener('pointercancel',end);
+    ghost.remove();src.cell.classList.remove('lifting');
+    if(tgt){tgt.cell.classList.remove('target');const a=getData(src),b=getData(tgt);putData(tgt,a);putData(src,b);}};
+  window.addEventListener('pointermove',mv);window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&arrange&&!modal.classList.contains('show'))setArrange(false);});
+
+/* ---------- live GIF preview under the settings ---------- */
+const miniBox=$('miniBox'),mini=$('mini'),mctx=mini.getContext('2d');
+var MINI=null,miniGen=0,miniTimer=0,miniReady=false;
+function schedulePreview(){if(!miniReady)return;clearTimeout(schedulePreview.t);schedulePreview.t=setTimeout(refreshMini,650);}
+function playMini(){clearTimeout(miniTimer);if(!MINI)return;let i=0;
+  const step=()=>{const f=MINI.T[i];drawFrame(mctx,MINI.P,f.s);
+    miniTimer=setTimeout(()=>{i++;if(i>=MINI.T.length){if(!cfg.loop)return;i=0;}step();},f.d);};step();}
+async function refreshMini(){
+  if(!libsOk())return;
+  if(!filledCells().length){clearTimeout(miniTimer);MINI=null;miniBox.classList.remove('on');return;}
+  if(document.activeElement&&document.activeElement.isContentEditable){schedulePreview();return;}
+  const gen=++miniGen;
+  try{const P=await prepare(true);if(gen!==miniGen)return;const T=buildTimeline(P);
+    MINI={P,T};mini.width=P.cw;mini.height=P.ch;miniBox.classList.add('on');playMini();}
+  catch(e){console.error(e);}
+}
+$('miniBig').addEventListener('click',()=>$('gifBtn').click());
 /* ending drawer */
 $('endRow').addEventListener('click',()=>{const d=$('endDrawer');d.hidden=!d.hidden;$('endRow').classList.toggle('open',!d.hidden);});
 
@@ -850,6 +921,7 @@ syncCond();
 card.classList.toggle('showfoot',cfg.showFoot);
 buildGrid(cfg.cols);
 requestAnimationFrame(fit);
+miniReady=true;schedulePreview();
 </script>
 </body>
 </html>
